@@ -13,5 +13,5 @@ class Config:
     train_name = "whisper"
     train_id = "fluers"
     model_name = "base"
-    lang = "vi"
+    lang = "en"
     checkpoint_path = ""  # using origin model if this path is invaild

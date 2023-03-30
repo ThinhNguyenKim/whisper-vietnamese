@@ -20,7 +20,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint_path', type=str, default='checkpoint-epoch=0014.ckpt', help='path of checkpoint, if not set, use origin pretrained model')
-    parser.add_argument('--audio_path', type=str, default='test01.wav', help='the audio file for inference')
+    parser.add_argument('--audio_path', type=str, default='thinh_en.m4a', help='the audio file for inference')
 
     args = parser.parse_args()
     config = Config()
@@ -46,7 +46,7 @@ if __name__=="__main__":
 
     # decode the audio
     options = whisper.DecodingOptions(
-        language="vi", without_timestamps=True, fp16=torch.cuda.is_available()
+        language="en", without_timestamps=True, fp16=torch.cuda.is_available()
     )
 
     result = model.decode(mel, options)

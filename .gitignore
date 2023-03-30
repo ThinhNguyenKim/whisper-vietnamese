@@ -222,5 +222,8 @@ ffmpeg-2022-10-02-git-5f02a261a2-essentials_build/
 *.ckpt
 *.bin
 
+# Notebook
+*.ipynb
+
 # End of https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks,audio,windows
 
