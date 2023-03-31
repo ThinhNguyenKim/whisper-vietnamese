@@ -1,8 +1,7 @@
-from fastapi import FastAPI, Request, File, UploadFile
+from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from werkzeug.utils import secure_filename
 import os
 import whisper
 import torch
