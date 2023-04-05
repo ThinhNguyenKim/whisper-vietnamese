@@ -14,6 +14,7 @@ import pandas as pd
 from config import Config
 from dataset import load_dataset, WhisperDataCollatorWithPadding
 from model import WhisperModelModule
+from utils import hf_to_whisper_states
 
 
 
@@ -23,24 +24,38 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--checkpoint_path', type=str, default='', help='path of checkpoint, if not set, use origin pretrained model')
     parser.add_argument('--dataset_name', type=str, default='fluers', help='the dataset for finetuning, includes fluers, vin100h, vlsp2019')
-    parser.add_argument('--model_name', type=str, default='tiny', help='model name')
+    parser.add_argument('--model_name', type=str, default='small', help='model name')
+    parser.add_argument('--language', type=str, default='en', help='language')
 
     args = parser.parse_args()
-    config = Config()
-    config.checkpoint_path = args.checkpoint_path
-    config.model_name = args.model_name
 
-    module = WhisperModelModule(config)
-    try:
-        state_dict = torch.load(config.checkpoint_path)
-        state_dict = state_dict["state_dict"]
-        module.load_state_dict(state_dict)
-        print(f"load checkpoint successfully from {config.checkpoint_path}")
-    except Exception as e:
-        print(e)
-        print(f"load checkpoint failt using origin weigth of {config.model_name} model")
-    model = module.model
-    model.to(device)
+    config = Config()
+
+    if ".bin" in args.checkpoint_path:
+        hf_state_dict = torch.load(args.checkpoint_path, map_location=torch.device(device))
+
+        for key in list(hf_state_dict.keys())[:]:
+            new_key = hf_to_whisper_states(key)
+            hf_state_dict[new_key] = hf_state_dict.pop(key)
+        
+        model = whisper.load_model(args.model_name)
+        model.load_state_dict(hf_state_dict)
+        model.to(device)
+    else:
+        config.checkpoint_path = args.checkpoint_path
+        config.model_name = args.model_name
+
+        module = WhisperModelModule(config)
+        try:
+            state_dict = torch.load(config.checkpoint_path)
+            state_dict = state_dict["state_dict"]
+            module.load_state_dict(state_dict)
+            print(f"load checkpoint successfully from {config.checkpoint_path}")
+        except Exception as e:
+            print(e)
+            print(f"load checkpoint failt using origin weigth of {config.model_name} model")
+        model = module.model
+        model.to(device) 
 
     _, valid_dataset = load_dataset(args.dataset_name, test=True)
     test_loader = torch.utils.data.DataLoader(
@@ -52,7 +67,7 @@ if __name__=="__main__":
 
     # decode the audio
     options = whisper.DecodingOptions(
-        language="vi", without_timestamps=True, fp16=torch.cuda.is_available()
+        language=args.language, without_timestamps=True, fp16=torch.cuda.is_available()
     )
 
     hypotheses = []
