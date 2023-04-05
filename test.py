@@ -31,6 +31,7 @@ if __name__=="__main__":
 
     config = Config()
 
+    # Load model
     if ".bin" in args.checkpoint_path:
         hf_state_dict = torch.load(args.checkpoint_path, map_location=torch.device(device))
 
@@ -55,8 +56,9 @@ if __name__=="__main__":
             print(e)
             print(f"load checkpoint failt using origin weigth of {config.model_name} model")
         model = module.model
-        model.to(device) 
-
+        model.to(device)
+     
+    # Load dataset
     _, valid_dataset = load_dataset(args.dataset_name, test=True)
     test_loader = torch.utils.data.DataLoader(
         valid_dataset,
@@ -65,7 +67,7 @@ if __name__=="__main__":
         collate_fn=WhisperDataCollatorWithPadding(),
     )
 
-    # decode the audio
+    # Decode the audio
     options = whisper.DecodingOptions(
         language=args.language, without_timestamps=True, fp16=torch.cuda.is_available()
     )

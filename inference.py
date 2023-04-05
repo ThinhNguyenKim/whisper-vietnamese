@@ -11,7 +11,7 @@ import argparse
 
 from config import Config
 from model import WhisperModelModule
-from utils import load_wave
+from utils import load_wave, hf_to_whisper_states
 
 
 
@@ -24,19 +24,31 @@ if __name__=="__main__":
 
     args = parser.parse_args()
     config = Config()
-    config.checkpoint_path = args.checkpoint_path
+    if ".bin" in args.checkpoint_path:
+        hf_state_dict = torch.load(args.checkpoint_path, map_location=torch.device(device))
 
-    module = WhisperModelModule(config)
-    try:
-        state_dict = torch.load(config.checkpoint_path, map_location=torch.device(device))
-        state_dict = state_dict["state_dict"]
-        module.load_state_dict(state_dict)
-        # print(f"load checkpoint successfully from {config.checkpoint_path}")
-    except Exception as e:
-        print(e)
-        print(f"load checkpoint failt using origin weigth of {config.model_name} model")
-    model = module.model
-    model.to(device)
+        for key in list(hf_state_dict.keys())[:]:
+            new_key = hf_to_whisper_states(key)
+            hf_state_dict[new_key] = hf_state_dict.pop(key)
+        
+        model = whisper.load_model(args.model_name)
+        model.load_state_dict(hf_state_dict)
+        model.to(device)
+    else:
+        config.checkpoint_path = args.checkpoint_path
+        config.model_name = args.model_name
+
+        module = WhisperModelModule(config)
+        try:
+            state_dict = torch.load(config.checkpoint_path)
+            state_dict = state_dict["state_dict"]
+            module.load_state_dict(state_dict)
+            print(f"load checkpoint successfully from {config.checkpoint_path}")
+        except Exception as e:
+            print(e)
+            print(f"load checkpoint failt using origin weigth of {config.model_name} model")
+        model = module.model
+        model.to(device)
 
     audio = whisper.load_audio(args.audio_path)
     audio = whisper.pad_or_trim(audio)
