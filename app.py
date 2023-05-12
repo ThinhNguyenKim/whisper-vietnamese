@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import os
 from datetime import datetime
+from typing import Optional
+import time
 
 import whisper
 import torch
@@ -73,7 +75,10 @@ class version(str, Enum):
 
 
 @app.post("/Whisper/")
-def speech_to_text(file: UploadFile, language: language, version: version):
+def speech_to_text(file: UploadFile,
+                   language: language,
+                   version: version,
+                   beam_size: Optional[int]=None):
     audio_path = file.filename
 
     audio = whisper.load_audio(audio_path)
@@ -82,10 +87,13 @@ def speech_to_text(file: UploadFile, language: language, version: version):
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
 
     options = whisper.DecodingOptions(
-    language=language, without_timestamps=True, fp16=torch.cuda.is_available()
+    language=language, without_timestamps=True,fp16=torch.cuda.is_available(), beam_size=beam_size
 )
     if version == 'small':
+        start_time = time.time()
         result = whisper.decode(model, mel, options)
+        end_time = time.time()
+        print(end_time - start_time)
     elif version == 'base':
         result = base_model.decode(mel, options)
     
