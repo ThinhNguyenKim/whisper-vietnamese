@@ -9,9 +9,9 @@ import whisper
 import torch
 import argparse
 
-from config import Config
-from model import WhisperModelModule
-from utils import load_wave, hf_to_whisper_states
+from asr.config import Config
+from asr.model import WhisperModelModule
+from asr.utils import load_wave, hf_to_whisper_states
 
 
 

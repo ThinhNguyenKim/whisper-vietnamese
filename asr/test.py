@@ -11,10 +11,10 @@ import argparse
 from tqdm import tqdm
 import pandas as pd
 
-from config import Config
-from dataset import load_dataset, WhisperDataCollatorWithPadding
-from model import WhisperModelModule
-from utils import hf_to_whisper_states
+from asr.config import Config
+from asr.dataset import load_dataset, WhisperDataCollatorWithPadding
+from asr.model import WhisperModelModule
+from asr.utils import hf_to_whisper_states
 
 
 

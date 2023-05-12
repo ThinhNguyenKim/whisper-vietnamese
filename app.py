@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,13 +7,14 @@ import os
 from datetime import datetime
 from typing import Optional
 import time
+from loguru import logger
 
 import whisper
 import torch
-from config import Config
-from model import WhisperModelModule
+from asr.config import Config
+from asr.model import WhisperModelModule
 
-from utils import hf_to_whisper_states
+from asr.utils import hf_to_whisper_states
 
 from enum import Enum
 
@@ -90,12 +92,21 @@ def speech_to_text(file: UploadFile,
     language=language, without_timestamps=True,fp16=torch.cuda.is_available(), beam_size=beam_size
 )
     if version == 'small':
+        
         start_time = time.time()
+        
         result = whisper.decode(model, mel, options)
+        
         end_time = time.time()
-        print(end_time - start_time)
+        total_time = str(end_time - start_time)
+        
+        logger.success(total_time)
+    
     elif version == 'base':
         result = base_model.decode(mel, options)
     
     return {"transcribe": result.text}
+
+if __name__ == '__main__':
+    uvicorn.run("app:app", reload=True, host='0.0.0.0', port=8000)
 

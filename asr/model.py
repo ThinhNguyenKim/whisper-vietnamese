@@ -4,7 +4,7 @@ import whisper
 
 from pytorch_lightning import LightningModule
 
-from config import Config
+from asr.config import Config
 import evaluate
 
 from transformers import AdamW, get_linear_schedule_with_warmup

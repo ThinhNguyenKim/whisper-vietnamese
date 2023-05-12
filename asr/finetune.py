@@ -9,12 +9,12 @@ from config import Config
 # except ImportError:
 #     pass
 
-from dataset import load_dataset, WhisperDataCollatorWithPadding
+from asr.dataset import load_dataset, WhisperDataCollatorWithPadding
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from model import WhisperModelModule
+from asr.model import WhisperModelModule
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

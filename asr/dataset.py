@@ -7,7 +7,7 @@ import torchaudio
 import pandas as pd
 import whisper
 import torchaudio.transforms as at
-from utils import load_wave
+from asr.utils import load_wave
 from pathlib import Path
  
 class WhisperDataCollatorWithPadding:
