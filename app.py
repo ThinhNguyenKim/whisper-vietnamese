@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import Optional
 import time
 from loguru import logger
+import shutil
 
 import whisper
 import torch
@@ -77,13 +78,17 @@ class version(str, Enum):
 
 
 @app.post("/Whisper/")
-def speech_to_text(file: UploadFile,
-                   language: language,
-                   version: version,
-                   beam_size: Optional[int]=None):
-    audio_path = file.filename
+async def speech_to_text(
+    file: UploadFile,
+    language: language,
+    version: version,
+    beam_size: Optional[int]=None
+    ):
+    file_location = 'record.wav'
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
 
-    audio = whisper.load_audio(audio_path)
+    audio = whisper.load_audio(file_location)
     audio = whisper.pad_or_trim(audio)
 
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
@@ -108,5 +113,5 @@ def speech_to_text(file: UploadFile,
     return {"transcribe": result.text}
 
 if __name__ == '__main__':
-    uvicorn.run("app:app", reload=True, host='0.0.0.0', port=8000)
+    uvicorn.run("app:app", reload=True, host='0.0.0.0', port=8080)
 

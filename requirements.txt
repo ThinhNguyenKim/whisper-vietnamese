@@ -9,6 +9,7 @@ gdown==4.4.0
 fastapi
 uvicorn[standard]
 python-multipart
+loguru==0.7.0
 # PyAudio==0.2.13
 # SpeechRecognition==3.10.0
 # sounddevice==0.4.6
